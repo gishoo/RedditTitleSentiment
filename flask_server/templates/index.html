@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Reddit Post Title Sentiment</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Title Sentiment Analysis</h1>
+    <form action="/analyze" method="post">
+      <input type="text" name="keyword" placeholder="Keyword" required minlength="1" maxlength="100">
+      <input type="url" name="url" placeholder="URL" required pattern="https?://.+" title="Must be a valid URL starting with http:// or https://">
+      <button type="submit">Submit</button>
+    </form>
+  </div>
+</body>
+</html>
