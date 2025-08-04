@@ -28,7 +28,7 @@ except Exception as e:
 if model is None:
     try:
         print("Trying to load local model...")
-        model_path = "./distilbert_reddit_sentiment/final_model"
+        model_path = "../training/models/distilbert_reddit_sentiment/final_model"
         model = DistilBertForSequenceClassification.from_pretrained(model_path)
         tokenizer = DistilBertTokenizerFast.from_pretrained(model_path)
         model.eval()
