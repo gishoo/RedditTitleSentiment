@@ -71,7 +71,7 @@ eval_dataset = train_test["test"]
 
 model = DistilBertForSequenceClassification.from_pretrained("distilbert-base-uncased", num_labels=3)
 
-output_dir = "./distilbert_reddit_sentiment"
+output_dir = "./models/distilbert_reddit_sentiment"
 training_args = TrainingArguments(
     output_dir=output_dir,
     evaluation_strategy="epoch",
