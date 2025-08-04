@@ -50,6 +50,7 @@ Once that's done run the makefile.
 
 * Model deployment
     * Description: The model is deployed to Digital Ocean's Cloud using a custom API.
+    The URL for the deployment is: ([ranking.quest](http://ranking.quest))
 
 * Reproducibility
     * Description: The setup instructions are above in the installation section. But in case something was missed. 
