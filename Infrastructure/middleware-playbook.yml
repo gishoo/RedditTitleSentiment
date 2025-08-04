@@ -1,0 +1,84 @@
+---
+- name: Set up MLflow on middleware-server
+  hosts: middleware
+  become: yes
+
+  vars_files:
+    - group_vars/middleware.yml
+
+  tasks:
+
+    - name: Install dependencies
+      apt:
+        name:
+          - python3-pip
+          - python3-venv
+          - git
+          - unzip
+        update_cache: yes
+
+    - name: Create mlflow user
+      user:
+        name: mlflow
+        create_home: yes
+        shell: /bin/bash
+
+    - name: Create MLflow application directory
+      file:
+        path: /opt/mlflow
+        state: directory
+        owner: mlflow
+        group: mlflow
+        mode: "0755"
+
+    - name: Set up Python virtual environment
+      command: python3 -m venv /opt/mlflow/venv
+      creates: /opt/mlflow/venv
+
+    - name: Install MLflow in virtualenv
+      pip:
+        name: mlflow=={{ mlflow_version }}
+        virtualenv: /opt/mlflow/venv
+
+    - name: Ensure MLflow log directory exists
+      file:
+        path: /var/log/mlflow
+        state: directory
+        owner: mlflow
+        group: mlflow
+        mode: "0755"
+
+    - name: Create MLflow systemd service
+      copy:
+        dest: /etc/systemd/system/mlflow.service
+        content: |
+          [Unit]
+          Description=MLflow Tracking Server
+          After=network.target
+
+          [Service]
+          User=mlflow
+          WorkingDirectory=/opt/mlflow
+          ExecStart=/opt/mlflow/venv/bin/mlflow server \
+            --backend-store-uri sqlite:///mlflow.db \
+            --default-artifact-root s3://{{ artifact_bucket }} \
+            --host 0.0.0.0 \
+            --port {{ mlflow_port }} \
+            >> /var/log/mlflow/mlflow.log 2>&1
+          Environment=MLFLOW_S3_ENDPOINT_URL={{ s3_endpoint }}
+          Environment=AWS_ACCESS_KEY_ID={{ do_spaces_access_key_id }}
+          Environment=AWS_SECRET_ACCESS_KEY={{ do_spaces_secret_access_key }}
+          Restart=always
+
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Reload systemd
+      systemd:
+        daemon_reload: yes
+
+    - name: Enable and start MLflow service
+      systemd:
+        name: mlflow
+        enabled: yes
+        state: started
