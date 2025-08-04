@@ -78,6 +78,7 @@ def is_valid_url(url):
     except Exception:
         return False
 
+
 def call_external_api(title):
     try:
         response = requests.post(
@@ -120,6 +121,7 @@ def scrape_and_analyze(url):
 def index():
     return render_template('index.html')
 
+
 @app.route('/analyze', methods=['POST'])
 def analyze():
     url = request.form.get('url', '').strip()
@@ -134,10 +136,12 @@ def analyze():
 
     return render_template('results.html', post_title=result['title'], analysis=result['sentiment'])
 
+
 @app.route('/history')
 def history():
     all_entries = URLTitle.query.all()
     return render_template('history.html', entries=all_entries)
+
 
 @app.route('/reanalyze', methods=['POST'])
 def reanalyze():
@@ -170,6 +174,7 @@ def reanalyze():
 
     sentiment = call_external_api(new_title)
     return render_template('results.html', post_title=new_title, analysis=sentiment)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
