@@ -6,15 +6,18 @@
   vars_files:
     - group_vars/middleware.yml
 
-  tasks:
+  vars:
+    flask_server_ip: "{{ lookup('ini', 'flask-server  section=flask_server file=../infrastructure/inventory.ini') }}"
 
-    - name: Install dependencies
+  tasks:
+    - name: Install system dependencies
       apt:
         name:
           - python3-pip
           - python3-venv
           - git
           - unzip
+          - ufw
         update_cache: yes
 
     - name: Create mlflow user
@@ -35,10 +38,18 @@
       command: python3 -m venv /opt/mlflow/venv
       creates: /opt/mlflow/venv
 
-    - name: Install MLflow in virtualenv
+    - name: Upgrade pip inside virtualenv
       pip:
-        name: mlflow=={{ mlflow_version }}
+        name: pip
+        state: latest
         virtualenv: /opt/mlflow/venv
+
+    - name: Install required Python modules inside virtualenv
+      pip:
+        virtualenv: /opt/mlflow/venv
+        name:
+          - mlflow
+          - boto3
 
     - name: Ensure MLflow log directory exists
       file:
@@ -47,6 +58,23 @@
         owner: mlflow
         group: mlflow
         mode: "0755"
+
+    - name: Configure UFW - Allow OpenSSH
+      ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: Configure UFW - Allow MLflow port for Flask server only
+      ufw:
+        rule: allow
+        proto: tcp
+        port: "{{ mlflow_port }}"
+        from_ip: "{{ flask_server_ip }}"
+
+    - name: Enable UFW
+      ufw:
+        state: enabled
+        logging: 'on'
 
     - name: Create MLflow systemd service
       copy:
