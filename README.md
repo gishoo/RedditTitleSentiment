@@ -56,7 +56,7 @@ Once that's done run the makefile.
     * Description: The setup instructions are above in the installation section. But in case something was missed. 
 
 * Best practices
-    * [No] There are unit tests 
+    * [Yes] There are unit tests 
     * [No] There is an integration test 
     * [No] Linter and/or code formatter are used
     * [Yes] There's a Makefile
