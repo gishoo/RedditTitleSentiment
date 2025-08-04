@@ -4,55 +4,60 @@ Sentiment Analysis on Reddit Post Titles
 
 
 REQUIREMENTS
-Reddit API Token (Instructions for obtaining this)
-Digital Ocean API Token (Instructions for obtaining this)
-SSH key uploaded to DigitalOcean
+OS:
+Linux (Because Ansible is used)
+
+Credentials:
+Reddit API Credentials ([Instructions for obtaining this](https://github.com/reddit-archive/reddit/wiki/OAuth2))
+Digital Ocean API Token ([Instructions for obtaining this](https://docs.digitalocean.com/reference/api/create-personal-access-token/))
+SSH key uploaded to DigitalOcean ([Instructions](https://docs.digitalocean.com/platform/teams/how-to/upload-ssh-keys/))
+
 
 INSTALL
-Place your reddit API and Digital Ocean API tokens into environment variables then run make. Ansible scripts are used to configure the servers so you must run this from a linux host.
 
+Clone the repository.
 
+```https://github.com/gishoo/RedditTitleSentiment
+cd RedditTitleSentiment
+```
+
+Place your reddit API and Digital Ocean API credentials into environment variables. 
+
+```REDDIT_CLIENT_ID=YourCleintID
+REDDIT_CLIENT_SECRET=YourClientSecret
+REDDIT_USER_AGENT=YourUserAgent
+```
+
+```
+TF_VAR_do_token=YourDigitalOceanApiToken
+TF_VAR_ssh_key_ids=YourSshPublicKeys
+```
+
+Once that's done run the makefile.
+
+```make```
 
 ## Evaluation Criteria
 
 * Problem description
-    * Description: Gather insights on how users feel about topics. 
-    * 0 points: The problem is not described
-    * 1 point: The problem is described but shortly or not clearly 
-    * 2 points: The problem is well described and it's clear what the problem the project solves
+    * Description: A company has multiple social media profiles and platforms for community outreach, but is overwhelmed trying to analyze all of them. This project is a way for them to quickly gauge how there customers feel about them and their products. 
+
 * Cloud
-    * Layout:  
-    * 0 points: Cloud is not used, things run only locally
-    * 2 points: The project is developed on the cloud OR uses localstack (or similar tool) OR the project is deployed to Kubernetes or similar container management platforms
-    * 4 points: The project is developed on the cloud and IaC tools are used for provisioning the infrastructure
+    * Description: This project is developed on Digital Ocean's Cloud and Terraform and Ansible are used for provisioning and configuration respectively. 
+
 * Experiment tracking and model registry
-    * Layout:  
-    * 0 points: No experiment tracking or model registry
-    * 2 points: Experiments are tracked or models are registered in the registry
-    * 4 points: Both experiment tracking and model registry are used
-* Workflow orchestration
-    * Layout:  
-    * 0 points: No workflow orchestration
-    * 2 points: Basic workflow orchestration
-    * 4 points: Fully deployed workflow 
+    * Description: The project uses Mlflow for experiment tracking and model registry.  
+
 * Model deployment
-    * Layout: 
-    * 0 points: Model is not deployed
-    * 2 points: Model is deployed but only locally
-    * 4 points: The model deployment code is containerized and could be deployed to cloud or special tools for model deployment are used
-* Model monitoring
-    * Layout: Evidently is used for model monitoring.
-    * 0 points: No model monitoring
-    * 2 points: Basic model monitoring that calculates and reports metrics
-    * 4 points: Comprehensive model monitoring that sends alerts or runs a conditional workflow (e.g. retraining, generating debugging dashboard, switching to a different model) if the defined metrics threshold is violated
+    * Description: The model is deployed to Digital Ocean's Cloud using a custom API.
+
 * Reproducibility
-    * 0 points: No instructions on how to run the code at all, the data is missing
-    * 2 points: Some instructions are there, but they are not complete OR instructions are clear and complete, the code works, but the data is missing
-    * 4 points: Instructions are clear, it's easy to run the code, and it works. The versions for all the dependencies are specified.
+    * Description: The setup instructions are above in the installation section. But in case something was missed. 
+
 * Best practices
-    * [ ] There are unit tests (1 point)
-    * [ ] There is an integration test (1 point)
-    * [ ] Linter and/or code formatter are used (1 point)
-    * [ ] There's a Makefile (1 point)
-    * [ ] There are pre-commit hooks (1 point)
-    * [ ] There's a CI/CD pipeline (2 points)
+    * [No] There are unit tests 
+    * [No] There is an integration test 
+    * [No] Linter and/or code formatter are used
+    * [Yes] There's a Makefile
+    * [No] There are pre-commit hooks 
+    * [No] There's a CI/CD pipeline
