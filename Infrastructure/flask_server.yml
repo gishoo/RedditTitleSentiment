@@ -1,19 +1,38 @@
 ---
-- name: Deploy RedditTitleSentiment Flask app and API
+- name: Deploy RedditTitleSentiment Flask app and API (isolated venvs)
   hosts: webservers
   become: yes
   vars:
-    repo_url: "https://github.com/gishoo/RedditTitleSentiment.git"
+    repo_url: "https://github.com/YOUR_USERNAME/RedditTitleSentiment.git"
     repo_dest: /opt/RedditTitleSentiment
     app_user: flaskuser
-    venv_path: /opt/RedditTitleSentiment/venv
+
+    # Virtual environment paths
+    venv_app: /opt/RedditTitleSentiment/venv_app
+    venv_api: /opt/RedditTitleSentiment/venv_api
+
     flask_server_path: "{{ repo_dest }}/flask_server"
     gunicorn_socket: /run/gunicorn.sock
     frontend_service: flask_server_gunicorn
     api_service: flask_api_gunicorn
 
+    # Requirements for each component
+    app_py_reqs:
+      - flask
+      - flask_sqlalchemy
+      - gunicorn
+      - praw
+      - beautifulsoup4
+      - requests
+    api_py_reqs:
+      - flask
+      - gunicorn
+      - transformers
+      - torch
+      - mlflow
+
   tasks:
-    - name: Ensure required packages are installed
+    - name: Ensure required apt packages are installed
       apt:
         name:
           - python3
@@ -36,23 +55,25 @@
         update: yes
         version: main
 
-    - name: Create virtual environment
-      command: python3 -m venv "{{ venv_path }}"
+    - name: Create virtual environment for app.py
+      command: python3 -m venv "{{ venv_app }}"
       args:
-        creates: "{{ venv_path }}/bin/activate"
+        creates: "{{ venv_app }}/bin/activate"
 
-    - name: Install Python dependencies
+    - name: Create virtual environment for api.py
+      command: python3 -m venv "{{ venv_api }}"
+      args:
+        creates: "{{ venv_api }}/bin/activate"
+
+    - name: Install app.py requirements
       pip:
-        name:
-          - flask
-          - gunicorn
-          - transformers
-          - torch
-          - mlflow
-          - beautifulsoup4
-          - requests
-          - flask_sqlalchemy
-        virtualenv: "{{ venv_path }}"
+        name: "{{ app_py_reqs }}"
+        virtualenv: "{{ venv_app }}"
+
+    - name: Install api.py requirements
+      pip:
+        name: "{{ api_py_reqs }}"
+        virtualenv: "{{ venv_api }}"
 
     - name: Set Reddit API environment variables
       copy:
@@ -75,9 +96,9 @@
           User={{ app_user }}
           Group=www-data
           WorkingDirectory={{ flask_server_path }}
-          Environment="PATH={{ venv_path }}/bin"
           EnvironmentFile=/etc/environment
-          ExecStart={{ venv_path }}/bin/gunicorn -w 3 -b unix:{{ gunicorn_socket }} app:app
+          Environment="PATH={{ venv_app }}/bin"
+          ExecStart={{ venv_app }}/bin/gunicorn -w 3 -b unix:{{ gunicorn_socket }} app:app
 
           [Install]
           WantedBy=multi-user.target
@@ -94,9 +115,9 @@
           User={{ app_user }}
           Group=www-data
           WorkingDirectory={{ flask_server_path }}
-          Environment="PATH={{ venv_path }}/bin"
           EnvironmentFile=/etc/environment
-          ExecStart={{ venv_path }}/bin/gunicorn -w 2 -b 127.0.0.1:5001 api:app
+          Environment="PATH={{ venv_api }}/bin"
+          ExecStart={{ venv_api }}/bin/gunicorn -w 2 -b 127.0.0.1:5001 api:app
 
           [Install]
           WantedBy=multi-user.target
@@ -148,7 +169,7 @@
       service:
         name: nginx
         state: restarted
-    
+
     - name: Ensure UFW is installed
       apt:
         name: ufw
@@ -176,3 +197,6 @@
         policy: deny
         logging: on
 
+  handlers:
+    - name: Reload Environment
+      command: systemctl daemon-reexec
