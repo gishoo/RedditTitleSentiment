@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Stored Titles</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <h1>Stored URL Titles</h1>
+    <table border="1" cellpadding="10" style="margin: auto;">
+      <tr>
+        <th>URL</th>
+        <th>Title</th>
+        <th>Reanalyze</th>
+      </tr>
+      {% for entry in entries %}
+      <tr>
+        <td>{{ entry.url }}</td>
+        <td>{{ entry.title }}</td>
+        <td>
+          <form action="/reanalyze" method="post" style="margin: 0;">
+            <input type="hidden" name="url" value="{{ entry.url }}">
+            <button type="submit">Reanalyze</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</body>
+</html>

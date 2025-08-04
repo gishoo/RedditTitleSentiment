@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Reddit Post Title Sentiment</title>
+  <title>Title Sentiment Analysis</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <div class="container">
-    <h1>    Reddit Title Sentiment    </h1>
+    <h1>Title Sentiment Analysis</h1>
     <form action="/analyze" method="post">
-      <input type="text" name="keyword" placeholder="Keyword" required minlength="1" maxlength="100">
-      <input type="url" name="url" placeholder="https://www.reddit.com/r/naturepics/comments/1m7kjdx/hazara_division_pakistan/" required pattern="https?://.+" title="Must be a valid URL starting with http:// or https://">
-      <button type="submit">Submit</button>
+      <input type="url" name="url" placeholder="URL" required pattern="https?://.+" title="Must be a valid URL">
+      <button type="submit">Analyze</button>
     </form>
   </div>
 </body>
