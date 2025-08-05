@@ -32,11 +32,6 @@ variable "droplet_size" {
   default = "s-1vcpu-1gb"
 }
 
-variable "ssh_key_ids" {
-  type        = list(string)
-  description = "List of SSH key IDs from DigitalOcean"
-}
-
 variable "spaces_access_key" {
   type        = string
   sensitive   = true
@@ -52,6 +47,18 @@ variable "spaces_secret_key" {
 variable "spaces_bucket_name" {
   type        = string
   description = "Manually created DigitalOcean Spaces bucket name"
+}
+
+variable "ssh_key_name" {
+  type        = string
+  description = "Name of the SSH key uploaded to DigitalOcean"
+}
+
+# --------------------------
+# Look up SSH key ID by name
+# --------------------------
+data "digitalocean_ssh_key" "default" {
+  name = var.ssh_key_name
 }
 
 # --------------------------
@@ -72,7 +79,7 @@ resource "digitalocean_droplet" "middleware" {
   region   = var.region
   size     = var.droplet_size
   image    = var.image
-  ssh_keys = var.ssh_key_ids
+  ssh_keys = [data.digitalocean_ssh_key.default.id]
 }
 
 resource "digitalocean_droplet" "web_server" {
@@ -80,7 +87,7 @@ resource "digitalocean_droplet" "web_server" {
   region   = var.region
   size     = var.droplet_size
   image    = var.image
-  ssh_keys = var.ssh_key_ids
+  ssh_keys = [data.digitalocean_ssh_key.default.id]
 }
 
 resource "digitalocean_droplet" "model_server" {
@@ -88,7 +95,7 @@ resource "digitalocean_droplet" "model_server" {
   region   = var.region
   size     = var.droplet_size
   image    = var.image
-  ssh_keys = var.ssh_key_ids
+  ssh_keys = [data.digitalocean_ssh_key.default.id]
 }
 
 # --------------------------
