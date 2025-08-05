@@ -1,3 +1,12 @@
+terraform {
+  required_providers {
+    digitalocean = {
+      source = "digitalocean/digitalocean"
+      version = "~> 2.0" # Specify a version constraint
+    }
+  }
+}
+
 provider "digitalocean" {
   token = var.do_token
 }
