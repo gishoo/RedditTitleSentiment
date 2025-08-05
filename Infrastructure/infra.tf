@@ -10,7 +10,6 @@ terraform {
 provider "digitalocean" {
 }
 
-
 variable "ssh_key_ids" {
   type        = list(string)
   description = "List of SSH key IDs to access the droplets"
@@ -45,7 +44,6 @@ resource "digitalocean_droplet" "middleware" {
   size     = var.droplet_size
   image    = var.image
   ssh_keys = var.ssh_key_ids
-  project_id = digitalocean_project.main.id
 }
 
 # --- Droplet: Web Server ---
@@ -55,7 +53,6 @@ resource "digitalocean_droplet" "web_server" {
   size     = var.droplet_size
   image    = var.image
   ssh_keys = var.ssh_key_ids
-  project_id = digitalocean_project.main.id
 }
 
 # --- Droplet: Model Server ---
@@ -65,7 +62,6 @@ resource "digitalocean_droplet" "model_server" {
   size     = var.droplet_size
   image    = var.image
   ssh_keys = var.ssh_key_ids
-  project_id = digitalocean_project.main.id
 }
 
 # --- Space for Artifact Storage ---
@@ -76,7 +72,16 @@ resource "digitalocean_spaces_access_key" "middleware_key" {
 resource "digitalocean_spaces_bucket" "middleware_space" {
   name   = "middleware-artifacts"
   region = var.region
-  project_id = digitalocean_project.main.id
+}
+
+resource "digitalocean_project_resources" "assign" {
+  project = digitalocean_project.main.id
+  resources = [
+    digitalocean_droplet.middleware.urn,
+    digitalocean_droplet.web_server.urn,
+    digitalocean_droplet.model_server.urn,
+    digitalocean_spaces_bucket.middleware_space.urn
+  ]
 }
 
 # Optional: Configure CORS or versioning if needed
