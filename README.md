@@ -7,6 +7,9 @@ REQUIREMENTS
 OS:
 Linux (Because Ansible is used)
 
+Applications:
+Terraform([Instructions](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli))
+
 Credentials:
 Reddit API Credentials ([Instructions for obtaining this](https://github.com/reddit-archive/reddit/wiki/OAuth2))
 Digital Ocean API Token ([Instructions for obtaining this](https://docs.digitalocean.com/reference/api/create-personal-access-token/))
@@ -19,6 +22,12 @@ Clone the repository.
 
 ```https://github.com/gishoo/RedditTitleSentiment
 cd RedditTitleSentiment
+```
+
+Install Terraform. If the above link doesn't work for you; then this might.
+```
+sudo apt install snap --classic
+sudo snap install terraform 
 ```
 
 Place your reddit API and Digital Ocean API credentials into environment variables. 
