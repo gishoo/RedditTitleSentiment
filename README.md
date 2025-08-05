@@ -23,7 +23,7 @@ cd RedditTitleSentiment
 
 Place your reddit API and Digital Ocean API credentials into environment variables. 
 
-```REDDIT_CLIENT_ID=YourCleintID
+```REDDIT_CLIENT_ID=YourClientID
 REDDIT_CLIENT_SECRET=YourClientSecret
 REDDIT_USER_AGENT=YourUserAgent
 ```
