@@ -8,14 +8,8 @@ terraform {
 }
 
 provider "digitalocean" {
-  token = var.do_token
 }
 
-variable "do_token" {
-  type        = string
-  description = "DigitalOcean API Token"
-  sensitive   = true
-}
 
 variable "ssh_key_ids" {
   type        = list(string)
