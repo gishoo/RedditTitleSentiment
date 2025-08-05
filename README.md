@@ -24,22 +24,32 @@ Clone the repository.
 cd RedditTitleSentiment
 ```
 
-Install Terraform. If the above link doesn't work for you; then this might.
+Install Terraform (if you haven't already) and doctl. 
+
 ```
 sudo apt install snap --classic
 sudo snap install terraform 
+sudo snap install doctl
+```
+
+Initialize doctl and use it to get your ssh-key id
+
+```
+doctl auth init # Then enter your DigitalOceanApiToken when prompted
+doctl compute ssh-key list 
 ```
 
 Place your reddit API and Digital Ocean API credentials into environment variables. 
 
-```REDDIT_CLIENT_ID=YourClientID
-REDDIT_CLIENT_SECRET=YourClientSecret
-REDDIT_USER_AGENT=YourUserAgent
+```
+export REDDIT_CLIENT_ID=YourClientID
+export REDDIT_CLIENT_SECRET=YourClientSecret
+export REDDIT_USER_AGENT=YourUserAgent
 ```
 
 ```
-TF_VAR_do_token=YourDigitalOceanApiToken
-TF_VAR_ssh_key_ids=YourSshPublicKeys
+export DIGITALOCEAN_TOKEN=YourDigitalOceanApiToken
+export TF_VAR_ssh_key_ids=YourSshKeyIdFromDoctl
 ```
 
 Once that's done run the makefile.
