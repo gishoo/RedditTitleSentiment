@@ -1,43 +1,72 @@
 terraform {
   required_providers {
     digitalocean = {
-      source = "digitalocean/digitalocean"
-      version = "~> 2.0" # Specify a version constraint
+      source  = "digitalocean/digitalocean"
+      version = "~> 2.0"
+    }
+    local = {
+      source = "hashicorp/local"
     }
   }
 }
 
 provider "digitalocean" {
+  token = var.do_token
+}
+
+variable "do_token" {
+  type        = string
+  sensitive   = true
+  description = "DigitalOcean API token"
+}
+
+variable "region" {
+  default = "nyc3"
+}
+
+variable "image" {
+  default = "ubuntu-24-04-x64"
+}
+
+variable "droplet_size" {
+  default = "s-1vcpu-1gb"
 }
 
 variable "ssh_key_ids" {
   type        = list(string)
-  description = "List of SSH key IDs to access the droplets"
+  description = "List of SSH key IDs from DigitalOcean"
 }
 
-variable "region" {
-  default     = "nyc3"
-  description = "DigitalOcean region"
+variable "spaces_access_key" {
+  type        = string
+  sensitive   = true
+  description = "Manually created DigitalOcean Spaces Access Key"
 }
 
-variable "image" {
-  default     = "ubuntu-24-04-x64"
+variable "spaces_secret_key" {
+  type        = string
+  sensitive   = true
+  description = "Manually created DigitalOcean Spaces Secret Key"
 }
 
-variable "droplet_size" {
-  default     = "s-1vcpu-1gb"
+variable "spaces_bucket_name" {
+  type        = string
+  description = "Manually created DigitalOcean Spaces bucket name"
 }
 
-# --- Project: Brand-Community-Analysis ---
+# --------------------------
+# Project
+# --------------------------
 resource "digitalocean_project" "main" {
   name        = "brand-community-analysis"
   purpose     = "Web Application"
   environment = "Development"
-  description = "Infrastructure for ML, Web, and Model services and storage"
+  description = "Infrastructure for MLflow, web, and model servers"
 }
 
-
-# --- Droplet: Middleware ---
+# --------------------------
+# Droplets
+# --------------------------
 resource "digitalocean_droplet" "middleware" {
   name     = "middleware-server"
   region   = var.region
@@ -46,7 +75,6 @@ resource "digitalocean_droplet" "middleware" {
   ssh_keys = var.ssh_key_ids
 }
 
-# --- Droplet: Web Server ---
 resource "digitalocean_droplet" "web_server" {
   name     = "web-server"
   region   = var.region
@@ -55,7 +83,6 @@ resource "digitalocean_droplet" "web_server" {
   ssh_keys = var.ssh_key_ids
 }
 
-# --- Droplet: Model Server ---
 resource "digitalocean_droplet" "model_server" {
   name     = "model-server"
   region   = var.region
@@ -64,62 +91,55 @@ resource "digitalocean_droplet" "model_server" {
   ssh_keys = var.ssh_key_ids
 }
 
-# --- Space for Artifact Storage ---
-resource "digitalocean_spaces_access_key" "middleware_key" {
-  name = "middleware-access-key"
-}
-
-resource "digitalocean_spaces_bucket" "middleware_space" {
-  name   = "middleware-artifacts"
-  region = var.region
-}
-
+# --------------------------
+# Assign droplets to the project
+# --------------------------
 resource "digitalocean_project_resources" "assign" {
   project = digitalocean_project.main.id
   resources = [
     digitalocean_droplet.middleware.urn,
     digitalocean_droplet.web_server.urn,
-    digitalocean_droplet.model_server.urn,
-    digitalocean_spaces_bucket.middleware_space.urn
+    digitalocean_droplet.model_server.urn
   ]
 }
 
-
-# --- Output Ansible Inventory File ---
+# --------------------------
+# Generate inventory.ini
+# --------------------------
 resource "local_file" "ansible_inventory" {
   filename = "${path.module}/inventory.ini"
   content = <<EOF
 [middleware]
 ${digitalocean_droplet.middleware.ipv4_address} ansible_user=root
 
-[web]
+[flask_server]
 ${digitalocean_droplet.web_server.ipv4_address} ansible_user=root
 
 [model]
 ${digitalocean_droplet.model_server.ipv4_address} ansible_user=root
-
-# DigitalOcean Space Info
-# Name: ${digitalocean_spaces_bucket.middleware_space.name}
-# Region: ${digitalocean_spaces_bucket.middleware_space.region}
 EOF
 }
 
+# --------------------------
+# Generate group_vars/middleware.yml (with placeholders for Spaces info)
+# --------------------------
 resource "local_file" "middleware_group_vars" {
   filename = "${path.module}/group_vars/middleware.yml"
-  content = <<-EOT
-    mlflow_version: "2.12.1"
-    mlflow_port: 5000
-    artifact_bucket: "${digitalocean_spaces_bucket.middleware_space.name}"
-    s3_region: "${var.region}"
-    s3_endpoint: "https://${var.region}.digitaloceanspaces.com"
+  content = <<EOF
+mlflow_version: "2.12.1"
+mlflow_port: 5000
+artifact_bucket: "${var.spaces_bucket_name}"
+s3_region: "${var.region}"
+s3_endpoint: "https://${var.region}.digitaloceanspaces.com"
 
-    do_spaces_access_key_id: "${digitalocean_spaces_access_key.mlflow.key}"
-    do_spaces_secret_access_key: "${digitalocean_spaces_access_key.mlflow.secret}"
-  EOT
+do_spaces_access_key_id: "${var.spaces_access_key}"
+do_spaces_secret_access_key: "${var.spaces_secret_key}"
+EOF
 }
 
-
-# --- Outputs ---
+# --------------------------
+# Outputs
+# --------------------------
 output "middleware_ip" {
   value = digitalocean_droplet.middleware.ipv4_address
 }
@@ -130,18 +150,4 @@ output "web_server_ip" {
 
 output "model_server_ip" {
   value = digitalocean_droplet.model_server.ipv4_address
-}
-
-output "space_name" {
-  value = digitalocean_spaces_bucket.mlflow_space.name
-}
-
-output "space_access_key" {
-  value     = digitalocean_spaces_access_key.middleware_key.access_key
-  sensitive = true
-}
-
-output "space_secret_key" {
-  value     = digitalocean_spaces_access_key.middleware_key.secret_key
-  sensitive = true
 }
