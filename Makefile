@@ -1,5 +1,5 @@
-TERRAFORM_DIR = infrastructure
-ANSIBLE_DIR = infrastructure
+TERRAFORM_DIR = Infrastructure
+ANSIBLE_DIR = Infrastructure
 INVENTORY_FILE = $(ANSIBLE_DIR)/inventory.ini
 
 all: infra wait-for-hosts configure
