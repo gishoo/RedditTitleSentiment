@@ -14,6 +14,6 @@ provider "digitalocean" {
   token = var.do_token
 }
 
-data "digitalocean_ssh_key" "Jwin" {
-  name = "Jwin"
+data "digitalocean_ssh_key" "dev-workstation" {
+  name = "dev-workstation"
 }

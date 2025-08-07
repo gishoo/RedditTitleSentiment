@@ -10,16 +10,6 @@ terraform {
   }
 }
 
-provider "digitalocean" {
-  token = var.do_token
-}
-
-variable "do_token" {}
-variable "pvt_key" {}
-
-data "digitalocean_ssh_key" "dev-workstation" {
-  name = "dev-workstation"
-}
 
 variable "region" {
   default = "nyc3"
