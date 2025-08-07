@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     digitalocean = {
-      source  = "digitalocean/digitalocean"
+      source = "digitalocean/digitalocean"
       version = "~> 2.0"
     }
     local = {
@@ -11,12 +11,14 @@ terraform {
 }
 
 provider "digitalocean" {
+  token = var.do_token
 }
 
-variable "do_token" {
-  type        = string
-  sensitive   = true
-  description = "DigitalOcean API token"
+variable "do_token" {}
+variable "pvt_key" {}
+
+data "digitalocean_ssh_key" "dev-workstation" {
+  name = "dev-workstation"
 }
 
 variable "region" {
@@ -48,17 +50,6 @@ variable "spaces_bucket_name" {
   description = "Manually created DigitalOcean Spaces bucket name"
 }
 
-variable "ssh_key_name" {
-  type        = string
-  description = "Name of the SSH key uploaded to DigitalOcean"
-}
-
-# --------------------------
-# Look up SSH key ID by name
-# --------------------------
-data "digitalocean_ssh_key" "default" {
-  name = var.ssh_key_name
-}
 
 # --------------------------
 # Project
