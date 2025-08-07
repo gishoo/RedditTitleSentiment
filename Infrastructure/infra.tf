@@ -1,16 +1,3 @@
-terraform {
-  required_providers {
-    digitalocean = {
-      source = "digitalocean/digitalocean"
-      version = "~> 2.0"
-    }
-    local = {
-      source = "hashicorp/local"
-    }
-  }
-}
-
-
 variable "region" {
   default = "nyc3"
 }
