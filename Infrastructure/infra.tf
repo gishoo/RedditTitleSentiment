@@ -46,7 +46,7 @@ resource "digitalocean_droplet" "middleware" {
   region   = var.region
   size     = var.droplet_size
   image    = var.image
-  ssh_keys = [data.digitalocean_ssh_key.default.id]
+  ssh_keys = [data.digitalocean_ssh_key.dev-workstation.id]
 }
 
 resource "digitalocean_droplet" "web_server" {
@@ -54,7 +54,7 @@ resource "digitalocean_droplet" "web_server" {
   region   = var.region
   size     = var.droplet_size
   image    = var.image
-  ssh_keys = [data.digitalocean_ssh_key.default.id]
+  ssh_keys = [data.digitalocean_ssh_key.dev-workstation.id]
 }
 
 resource "digitalocean_droplet" "model_server" {
@@ -62,7 +62,7 @@ resource "digitalocean_droplet" "model_server" {
   region   = var.region
   size     = var.droplet_size
   image    = var.image
-  ssh_keys = [data.digitalocean_ssh_key.default.id]
+  ssh_keys = [data.digitalocean_ssh_key.dev-workstation.id]
 }
 
 # --------------------------
